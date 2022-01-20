@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using AspNetCoreIdentity.Areas.Identity.Data;
+using AspNetCoreIdentity.Extensions;
+using Microsoft.AspNetCore.Authorization;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("AspNetCoreIdentityContextConnection");
@@ -12,6 +15,16 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddDefaultUI()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AspNetCoreIdentityContext>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("PodeLer", policy => policy.Requirements.Add(new PermissaoNecessaria("PodeLer")));
+    options.AddPolicy("PodeExcluir", policy => policy.Requirements.Add(new PermissaoNecessaria("PodeExcluir")));
+    options.AddPolicy("PodeEscrever", policy => policy.Requirements.Add(new PermissaoNecessaria("PodeEscrever")));
+
+});
+
+builder.Services.AddSingleton<IAuthorizationHandler, PermissaoNecessariaHandler>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
