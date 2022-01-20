@@ -3,18 +3,14 @@ using AspNetCoreIdentity.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
+
 
 namespace AspNetCoreIdentity.Controllers
 {
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
         [AllowAnonymous]
         public IActionResult Index()
         {
@@ -48,11 +44,34 @@ namespace AspNetCoreIdentity.Controllers
         {
             return View("Secret");
         }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [Route("erro/{id:length(3,3)}")]
+        public IActionResult Error(int id)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var modelErro = new ErrorViewModel();
+
+            if(id == 500)
+            {
+                modelErro.Mensagem = "Ocorreu um erro";
+                modelErro.Titulo = "Erro";
+                modelErro.ErroCode = id;
+            }
+            else if(id == 404)
+            {
+                modelErro.Mensagem = "Pagina não encontrada";
+                modelErro.Titulo = "not Found";
+                modelErro.ErroCode = id;
+            }
+            else if(id == 403)
+            {
+                modelErro.Mensagem = "Voçe não tem permissao";
+                modelErro.Titulo = "Acesso negado";
+                modelErro.ErroCode = id;
+            }
+            else
+            {
+                return StatusCode(404);
+            }
+            return View("Error", modelErro);
         }
     }
 }
